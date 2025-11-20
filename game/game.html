@@ -1,750 +1,186 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Impostor y Misterio - Juego de Deducción</title>
-    <!-- Incluimos Tailwind CSS para estilos responsivos y modernos -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Configuramos la fuente Inter y el estilo general para móvil */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f0f3f6;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* Estilos específicos para la tarjeta principal del juego */
-        #game-container {
-            width: 100%;
-            max-width: 480px;
-            /* Tamaño típico de un móvil grande */
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            border-radius: 1.5rem;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Estilo para el botón de "Pasar Dispositivo" que es grande y claro */
-        .pass-button {
-            transition: transform 0.1s ease-in-out;
-        }
-
-        .pass-button:active {
-            transform: scale(0.98);
-        }
-
-        /* Estilo para el texto grande y centrado en la vista de la palabra */
-        .word-reveal-text {
-            word-break: break-word;
-        }
-    </style>
+    <title>El Impostor - Juego de Deducción</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Estilos Propios -->
+    <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
 
-    <div id="game-container" class="bg-white p-6 sm:p-8">
-        <header class="text-center mb-6">
-            <h1 class="text-3xl font-extrabold text-gray-800">Juego de Palabras</h1>
-            <p class="text-gray-500 mt-1">Impostor & Misterio</p>
-        </header>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="text-center mb-4">
+            <h1><i class="fas fa-user-secret"></i> El Impostor</h1>
+            <p class="text-muted">Juego de Deducción Social</p>
+        </div>
 
-        <!-- PANTALLA 1: CONFIGURACIÓN INICIAL -->
-        <section id="setup-screen">
-            <h2 class="text-xl font-semibold mb-4 text-gray-700">1. Configuración del Juego</h2>
-
-            <div class="mb-5">
-                <label for="player-count" class="block text-sm font-medium text-gray-600 mb-2">Cantidad de Jugadores
-                    (3-10)</label>
-                <input type="number" id="player-count" value="4" min="3" max="10"
-                    class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-            </div>
-
-            <div class="mb-5">
-                <label for="impostor-count" class="block text-sm font-medium text-gray-600 mb-2">Cantidad de
-                    Impostores/Misteriosos (1-3)</label>
-                <input type="number" id="impostor-count" value="1" min="1" max="3"
-                    class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                <p id="impostor-error" class="text-sm text-red-500 mt-1 hidden">La cantidad de impostores no es válida.
-                </p>
-            </div>
-
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-600 mb-2">Modo de Juego</label>
-                <div class="space-y-2">
-                    <div class="bg-gray-100 p-3 rounded-lg flex items-center cursor-pointer hover:bg-gray-200">
-                        <input type="radio" id="mode-impostor" name="game-mode" value="impostor" checked
-                            class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500">
-                        <label for="mode-impostor" class="ml-3 text-sm font-medium text-gray-700">
-                            <span class="font-bold">Impostor (Espía):</span> No conoce la palabra.
-                        </label>
+        <!-- 1. PANTALLA DE CONFIGURACIÓN -->
+        <div id="screen-config" class="card card-custom animate-fade">
+            <div class="card-header card-header-custom">Configuración de Partida</div>
+            <div class="card-body">
+                <form id="configForm">
+                    <div class="mb-3">
+                        <label class="form-label">Categorías de Palabras</label>
+                        <div id="categories-container" class="d-flex flex-wrap gap-2">
+                            <!-- Se llena con JS -->
+                        </div>
+                        <small class="text-muted" id="category-error" style="display:none; color: #e74c3c !important;">Selecciona al menos una categoría.</small>
                     </div>
-                    <div class="bg-gray-100 p-3 rounded-lg flex items-center cursor-pointer hover:bg-gray-200">
-                        <input type="radio" id="mode-misterio" name="game-mode" value="misterio"
-                            class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500">
-                        <label for="mode-misterio" class="ml-3 text-sm font-medium text-gray-700">
-                            <span class="font-bold">Misterio:</span> Tiene una palabra distinta y relacionada.
-                        </label>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Cantidad de Jugadores (3-20)</label>
+                            <input type="number" id="numPlayers" class="form-control" min="3" max="20" value="4">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Roles Especiales (Impostores)</label>
+                            <input type="number" id="numImpostors" class="form-control" min="1" max="5" value="1">
+                        </div>
                     </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Modo de Juego</label>
+                        <select id="gameMode" class="form-select">
+                            <option value="impostor">Modo Clásico (Impostor no sabe nada)</option>
+                            <option value="mystery">Modo Misterio (Impostor tiene palabra distinta)</option>
+                        </select>
+                    </div>
+
+                    <button type="button" id="btn-to-names" class="btn btn-primary-custom">
+                        Siguiente: Ingresar Nombres
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 2. PANTALLA DE NOMBRES -->
+        <div id="screen-names" class="card card-custom d-none animate-fade">
+            <div class="card-header card-header-custom">Nombres de Jugadores</div>
+            <div class="card-body">
+                <div id="names-inputs-container" class="row g-3 mb-4">
+                    <!-- Inputs generados dinámicamente -->
                 </div>
-            </div>
-
-            <button onclick="startGameSetup()"
-                class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-blue-700 transition duration-150">
-                Definir Nombres
-            </button>
-        </section>
-
-        <!-- PANTALLA 2: INGRESO DE NOMBRES -->
-        <section id="name-input-screen" class="hidden">
-            <h2 class="text-xl font-semibold mb-4 text-gray-700">2. Ingresa los Nombres</h2>
-            <div id="player-names-input" class="space-y-3 mb-6">
-                <!-- Los campos de nombre se generarán aquí -->
-            </div>
-            <button onclick="assignRoles()"
-                class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-green-700 transition duration-150">
-                Asignar Roles y Palabras
-            </button>
-        </section>
-
-        <!-- PANTALLA 3: PASAR DISPOSITIVO / VER PALABRA -->
-        <section id="role-assignment-screen" class="hidden">
-            <div id="pass-device-view"
-                class="flex flex-col items-center justify-center text-center h-[calc(100vh-200px)] min-h-[300px]">
-                <p class="text-3xl font-bold text-gray-800 mb-4">¡Pasa el dispositivo!</p>
-                <p id="current-player-name-pass" class="text-5xl font-extrabold text-blue-600 mb-8"></p>
-                <p class="text-gray-500 mb-10">Cuando sea tu turno, toca para ver tu rol.</p>
-
-                <button onclick="showPlayerWord()" id="show-word-button"
-                    class="pass-button bg-gray-300 text-gray-800 font-bold py-5 px-8 rounded-full text-lg shadow-lg hover:bg-gray-400 transition duration-150">
-                    Ver Mi Rol
+                <button type="button" id="btn-start-game" class="btn btn-primary-custom">
+                    Comenzar Partida
                 </button>
             </div>
+        </div>
 
-            <div id="word-reveal-view"
-                class="hidden flex flex-col items-center justify-center text-center h-[calc(100vh-200px)] min-h-[300px]">
-                <p class="text-xl font-semibold text-gray-700 mb-2">Tu Nombre:</p>
-                <p id="player-name-reveal" class="text-4xl font-extrabold text-blue-600 mb-8"></p>
+        <!-- 3. PANTALLA DE PASE (SECRETO) -->
+        <div id="screen-pass" class="card card-custom d-none animate-fade">
+            <div class="card-header card-header-custom">Asignación de Roles</div>
+            <div class="card-body text-center">
+                <h3 id="pass-player-name" class="mb-4">Jugador X</h3>
+                <p>Pasa el dispositivo a este jugador.</p>
+                
+                <div id="role-card" class="d-none p-4 mb-3" style="background: rgba(0,0,0,0.2); border-radius: 10px;">
+                    <div id="role-title" class="role-reveal">ROL</div>
+                    <div id="word-display" class="secret-word">PALABRA</div>
+                </div>
 
-                <p class="text-xl font-semibold text-gray-700 mb-4">Tu Rol / Palabra Secreta es:</p>
-                <p id="player-word-reveal"
-                    class="word-reveal-text text-6xl font-black text-red-600 mb-10 p-4 border-2 border-red-200 rounded-xl bg-red-50">
-                </p>
-
-                <p id="game-info-reveal" class="text-sm text-gray-500 mb-6"></p>
-
-                <button onclick="hidePlayerWord()" id="next-player-button"
-                    class="pass-button bg-green-500 text-white font-bold py-4 px-8 rounded-xl text-xl shadow-lg hover:bg-green-600 transition duration-150">
-                    Ocultar y Pasar a <span id="next-player-name"></span>
-                </button>
+                <button id="btn-show-role" class="btn btn-primary-custom mb-2">Ver mi Rol</button>
+                <button id="btn-hide-role" class="btn btn-secondary-custom d-none">Ocultar y Pasar</button>
             </div>
-            <p id="assignment-progress" class="text-center text-sm text-gray-500 mt-4"></p>
-        </section>
+        </div>
 
-        <!-- PANTALLA 4: JUEGO / RONDA DE CONVERSACIÓN -->
-        <section id="gameplay-screen" class="hidden">
-            <h2 class="text-xl font-semibold mb-4 text-gray-700">3. Ronda de Interrogatorio</h2>
+        <!-- 4. PANTALLA DE JUEGO (RONDA) -->
+        <div id="screen-game" class="card card-custom d-none animate-fade">
+            <div class="card-header card-header-custom">Fase de Discusión</div>
+            <div class="card-body">
+                <!-- Cuenta regresiva inicial -->
+                <div id="countdown-overlay" class="text-center mb-3">
+                    <h2>Empieza en: <span id="countdown-val">3</span></h2>
+                </div>
 
-            <div id="countdown-area" class="text-center mb-6">
-                <p class="text-lg text-gray-600">El jugador inicial será:</p>
-                <p id="countdown-text" class="text-8xl font-black text-red-600 my-4">3</p>
-                <p id="starting-player-name" class="text-4xl font-extrabold text-blue-600"></p>
-            </div>
+                <div id="game-content" class="d-none">
+                    <div class="alert alert-info text-center">
+                        <strong>Inicia la conversación:</strong><br>
+                        <span id="first-player-name" class="fs-4">Nombre</span>
+                    </div>
 
-            <div id="game-status" class="hidden">
-                <p class="text-lg text-gray-700 mb-2">Turno de <span class="font-bold text-blue-600"
-                        id="current-speaker-name"></span></p>
-                <p id="active-players-list" class="text-sm text-gray-500 mb-4"></p>
-                <p class="text-sm text-gray-500 mb-4">Cada jugador debe decir una palabra relacionada con la
-                    ubicación/palabra. El objetivo es identificar al Impostor/Misterioso sin revelar la palabra secreta.
-                </p>
+                    <h5 class="mb-3">Estado de la Partida:</h5>
+                    <div id="active-players-list" class="mb-4">
+                        <!-- Lista de jugadores -->
+                    </div>
 
-                <div class="mt-6 flex justify-center">
-                    <button onclick="startVoting()"
-                        class="w-full bg-red-600 text-white font-bold py-4 px-6 rounded-xl text-xl hover:bg-red-700 transition duration-150 shadow-lg">
-                        Terminar Ronda y Empezar Votación
+                    <button id="btn-call-vote" class="btn btn-primary-custom bg-warning text-dark border-0">
+                        <i class="fas fa-gavel"></i> Solicitar Votación
                     </button>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <!-- PANTALLA 5: VOTACIÓN -->
-        <section id="voting-screen" class="hidden">
-            <h2 class="text-xl font-semibold mb-4 text-gray-700">4. Fase de Votación</h2>
-            <div id="voter-view" class="text-center">
-                <p class="text-lg text-gray-700 mb-2">Votante Actual:</p>
-                <p id="current-voter-name" class="text-4xl font-extrabold text-blue-600 mb-6"></p>
-                <p class="text-md text-gray-600 mb-3">¿A quién crees que debemos expulsar?</p>
-
-                <div id="voting-buttons" class="space-y-3 mb-6">
-                    <!-- Botones de voto se generarán aquí -->
+        <!-- 5. PANTALLA DE VOTACIÓN -->
+        <div id="screen-vote" class="card card-custom d-none animate-fade">
+            <div class="card-header card-header-custom">Votación en Curso</div>
+            <div class="card-body text-center">
+                <h4 class="mb-2">Vota: <span id="voter-name" class="text-warning">Jugador X</span></h4>
+                <p class="text-muted mb-3">Selecciona a quién quieres expulsar:</p>
+                
+                <div id="vote-buttons-container" class="d-flex flex-wrap justify-content-center gap-2">
+                    <!-- Botones de votación -->
+                </div>
+                
+                <!-- Área de Confirmación (Nuevo) -->
+                <div id="vote-confirm-area" class="mt-4 pt-3 border-top border-secondary d-none">
+                    <p class="mb-2">Has seleccionado a: <strong id="selected-candidate-name" class="text-danger">Nadie</strong></p>
+                    <button id="btn-confirm-vote" class="btn btn-primary-custom mb-2">CONFIRMAR VOTO</button>
+                    <br>
                 </div>
 
-                <button onclick="submitVote()" id="submit-vote-button"
-                    class="w-full bg-yellow-500 text-gray-900 font-bold py-3 px-4 rounded-xl hover:bg-yellow-600 transition duration-150"
-                    disabled>
-                    Confirmar Voto
-                </button>
+                <button id="btn-skip-vote" class="btn btn-secondary mt-3 btn-sm">Votar en Blanco (Saltar)</button>
             </div>
+        </div>
 
-            <div id="vote-passed-view"
-                class="hidden flex flex-col items-center justify-center text-center h-[calc(100vh-200px)] min-h-[300px]">
-                <p class="text-3xl font-bold text-gray-800 mb-4">¡Voto Registrado!</p>
-                <p class="text-xl text-gray-600 mb-8">Pasa el dispositivo al siguiente jugador.</p>
-                <button onclick="nextVoter()"
-                    class="pass-button bg-green-500 text-white font-bold py-4 px-8 rounded-xl text-xl shadow-lg hover:bg-green-600 transition duration-150">
-                    Siguiente Votante
-                </button>
+        <!-- 6. PANTALLA DE RESULTADOS -->
+        <div id="screen-results" class="card card-custom d-none animate-fade">
+            <div class="card-header card-header-custom">Resultados</div>
+            <div class="card-body text-center">
+                <div id="result-message-container" class="mb-4">
+                    <!-- Mensaje de expulsión -->
+                </div>
+                
+                <div id="game-over-container" class="d-none">
+                    <h2 id="winner-team" class="mb-3 fw-bold">Gana Equipo X</h2>
+                    <div id="reveal-roles-list" class="text-start mt-4 p-3 bg-dark rounded">
+                        <!-- Revelación de roles -->
+                    </div>
+                    <button onclick="location.reload()" class="btn btn-primary-custom mt-4">Jugar de Nuevo</button>
+                </div>
+
+                <button id="btn-continue-game" class="btn btn-primary-custom d-none">Continuar Discusión</button>
             </div>
-            <p id="voting-progress" class="text-center text-sm text-gray-500 mt-4"></p>
-        </section>
+        </div>
 
-        <!-- PANTALLA 6: RESULTADOS -->
-        <section id="results-screen" class="hidden">
-            <h2 class="text-xl font-semibold mb-4 text-gray-700">5. Resultados de la Votación</h2>
+    </div>
 
-            <div id="expulsion-result" class="text-center mb-6 p-6 bg-red-100 rounded-xl">
-                <p class="text-xl font-bold text-red-700 mb-2">Jugador Expulsado:</p>
-                <p id="expelled-player-name" class="text-5xl font-black text-red-800 mb-4"></p>
-                <p id="expelled-player-role" class="text-2xl font-semibold text-gray-700"></p>
-            </div>
-
-            <div id="game-end-message" class="text-center p-4 rounded-xl mb-6">
-                <p id="end-status" class="text-2xl font-bold text-green-700"></p>
-                <p id="master-word-reveal" class="mt-2 text-lg text-gray-700"></p>
-                <p id="mystery-word-reveal" class="mt-1 text-lg text-gray-700"></p>
-                <p id="remaining-specials-list" class="mt-4 text-lg font-bold text-red-500"></p>
-            </div>
-
-            <button onclick="resetGame()" id="reset-button"
-                class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-blue-700 transition duration-150">
-                Jugar de Nuevo
-            </button>
-        </section>
-
-        <!-- Modal para errores o información -->
-        <div id="error-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-            <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm mx-4">
-                <h3 id="modal-title" class="text-xl font-bold text-red-600 mb-3">Error</h3>
-                <p id="modal-message" class="text-gray-700 mb-4">Mensaje de error.</p>
-                <button onclick="closeModal()"
-                    class="w-full bg-red-500 text-white font-bold py-2 rounded-lg hover:bg-red-600">Entendido</button>
+    <!-- Modal Personalizado -->
+    <div class="modal fade" id="msgModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background-color: #34495e; color: white;">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title">Aviso</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="modal-body-text">
+                    ...
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <script>
-        // --- VARIABLES GLOBALES DEL JUEGO ---
-        let players = [];
-        let gameMode = 'impostor';
-        let playerCount = 4;
-        let impostorCount = 1;
-        let currentPlayerIndex = 0;
-        let currentVoterIndex = 0;
-        let votes = {}; // {voterIndex: votedPlayerIndex}
-        let allWords = [
-            // Palabras principales y misterio. Se eligen al azar.
-            { master: "Playa", mystery: "Piscina" },
-            { master: "Avión", mystery: "Tren" },
-            { master: "Bosque", mystery: "Montaña" },
-            { master: "Hospital", mystery: "Farmacia" },
-            { master: "Supermercado", mystery: "Bodega" }
-        ];
-        let secretWord = null;
-        let mysteryWord = null;
-        let rolesAssigned = false;
-        let countdownInterval = null;
-
-        // --- UTILITIES ---
-
-        function showModal(title, message, isError = true) {
-            document.getElementById('modal-title').textContent = title;
-            document.getElementById('modal-message').textContent = message;
-            const modalTitle = document.getElementById('modal-title');
-            const closeButton = document.getElementById('error-modal').querySelector('button');
-            if (isError) {
-                modalTitle.classList.remove('text-green-600');
-                modalTitle.classList.add('text-red-600');
-                closeButton.classList.remove('bg-green-500', 'hover:bg-green-600');
-                closeButton.classList.add('bg-red-500', 'hover:bg-red-600');
-            } else {
-                modalTitle.classList.remove('text-red-600');
-                modalTitle.classList.add('text-green-600');
-                closeButton.classList.remove('bg-red-500', 'hover:bg-red-600');
-                closeButton.classList.add('bg-green-500', 'hover:bg-green-600');
-            }
-            document.getElementById('error-modal').classList.remove('hidden');
-            document.getElementById('error-modal').classList.add('flex');
-        }
-
-        function closeModal() {
-            document.getElementById('error-modal').classList.add('hidden');
-            document.getElementById('error-modal').classList.remove('flex');
-        }
-
-        function switchScreen(screenId) {
-            const screens = ['setup-screen', 'name-input-screen', 'role-assignment-screen', 'gameplay-screen', 'voting-screen', 'results-screen'];
-            screens.forEach(id => {
-                document.getElementById(id).classList.add('hidden');
-            });
-            document.getElementById(screenId).classList.remove('hidden');
-        }
-
-        // --- FASE 1: CONFIGURACIÓN Y NOMBRES ---
-
-        function startGameSetup() {
-            // Validación de cantidad de jugadores
-            playerCount = parseInt(document.getElementById('player-count').value);
-            impostorCount = parseInt(document.getElementById('impostor-count').value);
-
-            if (isNaN(playerCount) || playerCount < 3 || playerCount > 10) {
-                showModal("Error de Jugadores", "La cantidad de jugadores debe estar entre 3 y 10.");
-                return;
-            }
-            if (isNaN(impostorCount) || impostorCount < 1 || impostorCount >= playerCount) {
-                showModal("Error de Roles", "Debe haber al menos 1 Impostor/Misterioso y no puede ser igual o mayor a la cantidad de jugadores.");
-                return;
-            }
-
-            gameMode = document.querySelector('input[name="game-mode"]:checked').value;
-
-            // Generar campos de entrada de nombres
-            const nameInputContainer = document.getElementById('player-names-input');
-            nameInputContainer.innerHTML = '';
-            for (let i = 0; i < playerCount; i++) {
-                nameInputContainer.innerHTML += `
-                <input type="text" id="player-name-${i}" placeholder="Nombre del Jugador ${i + 1}" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" value="Jugador ${i + 1}">
-            `;
-            }
-
-            switchScreen('name-input-screen');
-        }
-
-        function assignRoles() {
-            // Recopilar nombres de jugadores
-            players = [];
-            for (let i = 0; i < playerCount; i++) {
-                const name = document.getElementById(`player-name-${i}`).value.trim() || `Jugador ${i + 1}`;
-                players.push({ id: i, name: name, role: 'Normal', word: '', isExpelled: false });
-            }
-
-            // Asignar roles
-            const secretWords = allWords[Math.floor(Math.random() * allWords.length)];
-            secretWord = secretWords.master;
-            mysteryWord = secretWords.mystery;
-
-            // Crear una lista de IDs para asignar roles
-            let playerIds = players.map(p => p.id);
-
-            // Seleccionar los IDs de los impostores/misteriosos
-            let specialPlayerIds = [];
-            for (let i = 0; i < impostorCount; i++) {
-                const randomIndex = Math.floor(Math.random() * playerIds.length);
-                specialPlayerIds.push(playerIds.splice(randomIndex, 1)[0]);
-            }
-
-            // Asignar palabras
-            players.forEach(player => {
-                if (specialPlayerIds.includes(player.id)) {
-                    if (gameMode === 'impostor') {
-                        player.role = 'Impostor';
-                        player.word = 'No conoces la palabra secreta';
-                    } else { // misterio
-                        player.role = 'Misterioso';
-                        player.word = mysteryWord;
-                    }
-                } else {
-                    player.word = secretWord;
-                }
-            });
-
-            rolesAssigned = true;
-            currentPlayerIndex = 0;
-            startRoleAssignment();
-        }
-
-        // --- FASE 2: ASIGNACIÓN DE ROLES/PALABRAS ---
-
-        function startRoleAssignment() {
-            if (!rolesAssigned) return;
-
-            // Mostrar la pantalla de asignación de roles
-            switchScreen('role-assignment-screen');
-
-            // Inicializar el primer jugador
-            document.getElementById('current-player-name-pass').textContent = players[currentPlayerIndex].name;
-            document.getElementById('next-player-name').textContent = players[(currentPlayerIndex + 1) % playerCount].name;
-            updateAssignmentProgress();
-
-            // Asegurar que solo se vea la vista de "Pasar Dispositivo"
-            document.getElementById('pass-device-view').classList.remove('hidden');
-            document.getElementById('word-reveal-view').classList.add('hidden');
-        }
-
-        function updateAssignmentProgress() {
-            document.getElementById('assignment-progress').textContent = `Progreso: ${currentPlayerIndex + 1} de ${playerCount} jugadores han visto su rol.`;
-        }
-
-        function showPlayerWord() {
-            const player = players[currentPlayerIndex];
-
-            document.getElementById('player-name-reveal').textContent = player.name;
-            document.getElementById('player-word-reveal').textContent = player.word;
-
-            let infoText = `Modo: ${gameMode === 'impostor' ? 'Impostor' : 'Misterio'}.`;
-
-            if (player.role === 'Impostor') {
-                document.getElementById('player-word-reveal').classList.replace('text-red-600', 'text-black');
-                document.getElementById('player-word-reveal').classList.replace('bg-red-50', 'bg-gray-100');
-                infoText += ` Tienes que simular que conoces la palabra. ¡Cuidado!`;
-            } else if (player.role === 'Misterioso') {
-                document.getElementById('player-word-reveal').classList.replace('text-black', 'text-red-600');
-                document.getElementById('player-word-reveal').classList.replace('bg-gray-100', 'bg-red-50');
-                infoText += ` Tu palabra es distinta. Tienes que convencer de que eres normal.`;
-            } else {
-                document.getElementById('player-word-reveal').classList.replace('text-black', 'text-red-600');
-                document.getElementById('player-word-reveal').classList.replace('bg-gray-100', 'bg-red-50');
-                infoText += ` Tienes la palabra secreta. ¡Identifica a los especiales!`;
-            }
-
-            document.getElementById('game-info-reveal').textContent = infoText;
-
-            document.getElementById('pass-device-view').classList.add('hidden');
-            document.getElementById('word-reveal-view').classList.remove('hidden');
-        }
-
-        function hidePlayerWord() {
-            currentPlayerIndex++;
-            updateAssignmentProgress();
-
-            if (currentPlayerIndex < playerCount) {
-                // Siguiente jugador
-                startRoleAssignment();
-            } else {
-                // Todos han visto su palabra, comenzar el juego
-                currentPlayerIndex = Math.floor(Math.random() * playerCount); // Elige al jugador inicial al azar
-                startCountdown();
-            }
-        }
-
-        // --- FASE 3: CUENTA REGRESIVA Y JUEGO ---
-
-        function startCountdown() {
-            switchScreen('gameplay-screen');
-
-            document.getElementById('countdown-text').textContent = '3';
-            document.getElementById('starting-player-name').textContent = '';
-            document.getElementById('game-status').classList.add('hidden');
-            document.getElementById('countdown-area').classList.remove('hidden');
-
-            let count = 3;
-            const countdownElement = document.getElementById('countdown-text');
-
-            countdownInterval = setInterval(() => {
-                count--;
-                countdownElement.textContent = count > 0 ? count : '¡YA!';
-
-                if (count === 0) {
-                    clearInterval(countdownInterval);
-                    setTimeout(() => startNewRound(true), 1000);
-                }
-            }, 1000);
-        }
-
-        function startNewRound(isFirstRound = false) {
-            // Reiniciar variables de la ronda de votación
-            currentVoterIndex = 0;
-            votes = {};
-
-            // Obtener jugadores activos
-            const activePlayers = players.filter(p => !p.isExpelled);
-            if (activePlayers.length === 0) {
-                switchScreen('results-screen');
-                return;
-            }
-
-            let startingPlayer;
-            if (isFirstRound) {
-                // Para la primera ronda, usar el índice aleatorio ya seleccionado.
-                startingPlayer = players[currentPlayerIndex];
-            } else {
-                // Para rondas subsiguientes, empezar con el primer jugador activo por orden de ID.
-                startingPlayer = activePlayers[0];
-                currentPlayerIndex = players.findIndex(p => p.id === startingPlayer.id);
-            }
-
-            // Actualizar la lista de jugadores activos
-            document.getElementById('active-players-list').textContent = `Jugadores activos: ${activePlayers.map(p => p.name).join(', ')}`;
-
-            // Mostrar información de la ronda
-            document.getElementById('current-speaker-name').textContent = startingPlayer.name;
-
-            if (isFirstRound) {
-                showModal("¡Comienza el Juego!", `El jugador que empieza es: ${startingPlayer.name}. ¡A jugar!`, false);
-            } else {
-                showModal("¡Nueva Ronda!", `El jugador que empieza a hablar ahora es: ${startingPlayer.name}. ¡Continúen el interrogatorio!`, false);
-            }
-
-            // Transicionar a la pantalla de juego
-            switchScreen('gameplay-screen');
-            document.getElementById('countdown-area').classList.add('hidden');
-            document.getElementById('game-status').classList.remove('hidden');
-        }
-
-        // --- FASE 4: VOTACIÓN ---
-
-        function startVoting() {
-            switchScreen('voting-screen');
-
-            currentVoterIndex = 0;
-            votes = {};
-
-            document.getElementById('vote-passed-view').classList.add('hidden');
-            document.getElementById('voter-view').classList.remove('hidden');
-
-            startNextVoterTurn();
-        }
-
-        function startNextVoterTurn() {
-            const activePlayers = players.filter(p => !p.isExpelled);
-            const activePlayerIds = activePlayers.map(p => p.id);
-
-            // Encontrar el siguiente jugador activo que aún no ha votado
-            let nextVoterPlayer = null;
-            let potentialVoterIndex = currentVoterIndex;
-
-            while (potentialVoterIndex < playerCount) {
-                const player = players[potentialVoterIndex];
-                // Si el jugador está activo Y no ha votado
-                if (!player.isExpelled && votes[player.id] === undefined) {
-                    nextVoterPlayer = player;
-                    currentVoterIndex = potentialVoterIndex;
-                    break;
-                }
-                potentialVoterIndex++;
-            }
-
-            if (nextVoterPlayer === null) {
-                // Todos los activos han votado
-                processVotes();
-                return;
-            }
-
-            const voter = nextVoterPlayer;
-            document.getElementById('current-voter-name').textContent = voter.name;
-
-            document.getElementById('voter-view').classList.remove('hidden');
-            document.getElementById('vote-passed-view').classList.add('hidden');
-
-            // Generar botones de voto solo para jugadores activos y no el votante
-            const votingButtonsContainer = document.getElementById('voting-buttons');
-            votingButtonsContainer.innerHTML = '';
-
-            activePlayers.forEach(p => {
-                // No se puede votar por uno mismo
-                if (p.id !== voter.id) {
-                    votingButtonsContainer.innerHTML += `
-                    <button data-player-id="${p.id}" onclick="selectVote(${voter.id}, ${p.id})" class="vote-button w-full p-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition duration-150">
-                        Votar por ${p.name}
-                    </button>
-                `;
-                }
-            });
-
-            document.getElementById('submit-vote-button').disabled = true;
-            document.getElementById('voting-progress').textContent = `Votos restantes: ${activePlayers.length - Object.keys(votes).length}`;
-        }
-
-        let selectedVotedId = -1;
-
-        function selectVote(voterId, votedId) {
-            selectedVotedId = votedId;
-            document.getElementById('submit-vote-button').disabled = false;
-
-            // Resaltar el botón seleccionado
-            document.querySelectorAll('.vote-button').forEach(btn => {
-                btn.classList.remove('bg-blue-600', 'text-white');
-                btn.classList.add('bg-gray-200', 'text-gray-800');
-            });
-            document.querySelector(`[data-player-id="${votedId}"]`).classList.replace('bg-gray-200', 'bg-blue-600');
-            document.querySelector(`[data-player-id="${votedId}"]`).classList.replace('text-gray-800', 'text-white');
-        }
-
-        function submitVote() {
-            if (selectedVotedId !== -1) {
-                // Almacenar el voto usando el ID del votante (que es único)
-                const voterId = players[currentVoterIndex].id;
-                votes[voterId] = selectedVotedId;
-                selectedVotedId = -1;
-
-                document.getElementById('voter-view').classList.add('hidden');
-                document.getElementById('vote-passed-view').classList.remove('hidden');
-            } else {
-                showModal("Voto Inválido", "Por favor, selecciona a un jugador antes de confirmar el voto.");
-            }
-        }
-
-        function nextVoter() {
-            currentVoterIndex++; // Avanzar el índice de jugadores
-            startNextVoterTurn();
-        }
-
-        // --- FASE 5: RESULTADOS Y CHEQUEO DE FIN DE JUEGO ---
-
-        function processVotes() {
-            // Contar votos solo de jugadores activos
-            const voteTally = {}; // {votedPlayerId: count}
-
-            Object.values(votes).forEach(votedId => {
-                voteTally[votedId] = (voteTally[votedId] || 0) + 1;
-            });
-
-            // Encontrar al jugador más votado
-            let maxVotes = 0;
-            let expelledId = null;
-
-            for (const [id, count] of Object.entries(voteTally)) {
-                if (count > maxVotes) {
-                    maxVotes = count;
-                    expelledId = parseInt(id);
-                }
-            }
-
-            switchScreen('results-screen');
-
-            if (expelledId === null) {
-                document.getElementById('expelled-player-name').textContent = "NADIE";
-                document.getElementById('expelled-player-role').textContent = "No hubo un jugador expulsado (empate o sin votos)";
-                document.getElementById('expulsion-result').classList.remove('bg-red-100', 'bg-green-100');
-                document.getElementById('expulsion-result').classList.add('bg-yellow-100');
-                endGameCheck(false, null);
-                return;
-            }
-
-            const expelledPlayer = players.find(p => p.id === expelledId);
-            document.getElementById('expelled-player-name').textContent = expelledPlayer.name.toUpperCase();
-            document.getElementById('expelled-player-role').textContent = `Rol: ${expelledPlayer.role} (Palabra: ${expelledPlayer.word})`;
-
-            const isExpelledSpecial = expelledPlayer.role === 'Impostor' || expelledPlayer.role === 'Misterioso';
-
-            endGameCheck(isExpelledSpecial, expelledPlayer);
-        }
-
-        function endGameCheck(isExpelledSpecial, expelledPlayer) {
-            const endStatusElement = document.getElementById('end-status');
-            const endMessageContainer = document.getElementById('game-end-message');
-            const masterWordReveal = document.getElementById('master-word-reveal');
-            const mysteryWordReveal = document.getElementById('mystery-word-reveal');
-            const resetButton = document.getElementById('reset-button');
-
-            endMessageContainer.classList.remove('bg-green-100', 'bg-red-100', 'bg-yellow-100');
-            endStatusElement.classList.remove('text-green-700', 'text-red-700', 'text-yellow-700');
-            resetButton.classList.add('hidden'); // Ocultar por defecto, mostrar solo si el juego termina.
-
-            masterWordReveal.textContent = `Palabra Secreta: ${secretWord}`;
-            mysteryWordReveal.textContent = gameMode === 'misterio' ? `Palabra Misterio: ${mysteryWord}` : '';
-            document.getElementById('remaining-specials-list').innerHTML = ''; // Limpiar lista de especiales
-
-            // 1. Marcar al jugador como expulsado
-            if (expelledPlayer) {
-                expelledPlayer.isExpelled = true;
-                document.getElementById('expulsion-result').classList.remove('bg-red-100', 'bg-yellow-100');
-                document.getElementById('expulsion-result').classList.add(isExpelledSpecial ? 'bg-green-100' : 'bg-red-100');
-                document.getElementById('expulsion-result').querySelector('p:nth-child(1)').textContent = isExpelledSpecial ? "¡Expulsión Exitosa!" : "¡Expulsión Fallida!";
-            } else {
-                // Caso NADIE expulsado
-                document.getElementById('expulsion-result').classList.remove('bg-red-100', 'bg-green-100');
-                document.getElementById('expulsion-result').classList.add('bg-yellow-100');
-                document.getElementById('expulsion-result').querySelector('p:nth-child(1)').textContent = "Sin Expulsión";
-            }
-
-            // 2. Recalcular estado del juego
-            const remainingPlayers = players.filter(p => !p.isExpelled);
-            const currentRemainingSpecials = remainingPlayers.filter(p => p.role !== 'Normal').length;
-            const currentRemainingNormals = remainingPlayers.length - currentRemainingSpecials;
-
-            let gameContinues = true;
-            let winMessage = "";
-            let winnerTeam = null;
-
-            // A. Criterio de Victoria Normal: Todos los especiales han sido expulsados.
-            if (currentRemainingSpecials === 0 && currentRemainingNormals >= 0) {
-                winnerTeam = 'Normal';
-                winMessage = "¡VICTORIA para los jugadores Normales! Todos los jugadores especiales han sido expulsados.";
-                gameContinues = false;
-
-                // B. Criterio de Victoria Especial: El número de especiales restantes es igual o superior al de normales restantes.
-            } else if (currentRemainingSpecials >= currentRemainingNormals) {
-                winnerTeam = 'Special';
-                winMessage = `¡VICTORIA para el Impostor/Misterioso! Son ${currentRemainingSpecials} contra ${currentRemainingNormals} Normal(es) restante(s).`;
-                gameContinues = false;
-            }
-
-
-            // 3. Manejar el flujo del juego (Continuar o Terminar)
-            if (!gameContinues) {
-                // FIN DEL JUEGO
-                endStatusElement.textContent = winMessage;
-                endStatusElement.classList.add(winnerTeam === 'Normal' ? 'text-green-700' : 'text-red-700');
-                endMessageContainer.classList.add(winnerTeam === 'Normal' ? 'bg-green-100' : 'bg-red-100');
-                resetButton.classList.remove('hidden');
-
-                // Mostrar todos los roles especiales
-                const allSpecials = players.filter(p => p.role !== 'Normal');
-                const specialInfo = allSpecials.map(p => `${p.name} (${p.role}${p.isExpelled ? ' - EXPULSADO' : ' - ACTIVO'})`).join(', ');
-                document.getElementById('remaining-specials-list').textContent = `Roles Especiales: ${specialInfo}`;
-
-            } else {
-                // EL JUEGO CONTINÚA
-                let expulsionStatus = expelledPlayer ? (isExpelledSpecial ? 'Un jugador especial' : 'Un jugador normal') : 'Nadie';
-                endStatusElement.textContent = `${expulsionStatus} fue expulsado. ¡El juego CONTINÚA!`;
-                endStatusElement.classList.add('text-yellow-700');
-                endMessageContainer.classList.add('bg-yellow-100');
-
-                // Mostrar estado actual de jugadores
-                masterWordReveal.textContent = `Jugadores Activos: ${remainingPlayers.map(p => p.name).join(', ')}`;
-                mysteryWordReveal.textContent = `Especiales restantes: ${currentRemainingSpecials} | Normales restantes: ${currentRemainingNormals}`;
-
-                // Transicionar automáticamente a la siguiente ronda
-                setTimeout(() => {
-                    startNewRound(false);
-                }, 5000); // Muestra el resultado por 5 segundos
-            }
-        }
-
-
-        // --- RESET ---
-
-        function resetGame() {
-            players = [];
-            currentPlayerIndex = 0;
-            currentVoterIndex = 0;
-            votes = {};
-            rolesAssigned = false;
-            secretWord = null;
-            mysteryWord = null;
-            if (countdownInterval) clearInterval(countdownInterval);
-
-            // Restablecer estilos de pantallas
-            document.getElementById('countdown-area').classList.remove('hidden');
-            document.getElementById('game-status').classList.add('hidden');
-
-            switchScreen('setup-screen');
-        }
-
-        // Inicializar el juego
-        document.addEventListener('DOMContentLoaded', () => {
-            // No se requiere inicialización de Firebase ya que no usamos persistencia de datos.
-            // El juego comienza en la pantalla de configuración.
-        });
-    </script>
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="game.js"></script>
 </body>
-
 </html>
